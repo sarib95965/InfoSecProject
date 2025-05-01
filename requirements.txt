@@ -1,0 +1,5 @@
+Flask
+pqcrypto
+Flask-Talisman
+python-dotenv
+kyber-py

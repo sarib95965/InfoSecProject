@@ -1,39 +1,46 @@
-from crypto import generate_keys, encrypt_message, decrypt_message
-from flask import Flask, render_template, request, redirect, flash, jsonify
-from flask_talisman import Talisman
-from flask_wtf.csrf import CSRFProtect
-from dotenv import load_dotenv
 import os
+from flask import Flask, request, jsonify, render_template
+from dotenv import load_dotenv
+from flask_talisman import Talisman  # 🛡️ Import Talisman
 
 # Load environment variables
 load_dotenv()
 
+
+# Custom CSP to allow Bootstrap + inline scripts/styles
+csp = {
+    'default-src': [
+        '\'self\''
+    ],
+    'style-src': [
+        '\'self\'',
+        'https://cdn.jsdelivr.net',
+        '\'unsafe-inline\''
+    ],
+    'script-src': [
+        '\'self\'',
+        'https://cdn.jsdelivr.net',
+        '\'unsafe-inline\''
+    ]
+}
+
+
+# Initialize Flask app
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecret')
 
-# Security headers
-Talisman(app)
+# 🛡️ Enable Flask-Talisman with default settings (adds security headers)
+Talisman(app, content_security_policy=csp)
 
-# CSRF protection
-app.secret_key = os.getenv('SECRET_KEY', 'defaultsecretkey')
-csrf = CSRFProtect(app)
+# Import cryptographic functions
+from crypto import generate_keys, encrypt_message, decrypt_message
 
-# For CSRF token in templates
-@app.context_processor
-def inject_csrf():
-    from flask_wtf.csrf import generate_csrf
-    return dict(csrf_token=generate_csrf)
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        message = request.form.get('message')
-        flash(f"Message received: {message}", "info")
-        return redirect('/')
     return render_template('index.html')
 
 @app.route('/keygen', methods=['POST'])
 def keygen():
-    """Generate PQC key pair and return them"""
     public_key, private_key = generate_keys()
     return jsonify({
         'public_key': public_key.hex(),
@@ -42,7 +49,6 @@ def keygen():
 
 @app.route('/encrypt', methods=['POST'])
 def encrypt():
-    """Encrypt a message using provided public key"""
     data = request.get_json() or {}
     public_key_hex = data.get('public_key')
     message = data.get('message')
@@ -57,7 +63,6 @@ def encrypt():
 
 @app.route('/decrypt', methods=['POST'])
 def decrypt():
-    """Decrypt ciphertext using provided private key"""
     data = request.get_json() or {}
     private_key_hex = data.get('private_key')
     ciphertext_hex = data.get('ciphertext')
