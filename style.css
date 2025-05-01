@@ -1,0 +1,40 @@
+/* style.css */
+
+body {
+    background: linear-gradient(135deg, #6d90d2, #8ba8d2);
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    color: #343a40;
+    font-weight: bold;
+  }
+  .card {
+    border: none;
+    border-radius: 1rem;
+    background: #ffffffcc;
+    backdrop-filter: blur(10px);
+  }
+  .card-title {
+    color: #0077b6;
+    font-weight: 600;
+  }
+  button {
+    width: 100%;
+    font-weight: bold;
+  }
+  pre {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  textarea, input {
+    background: #f0f4f8;
+    border: 1px solid #ced4da;
+  }
+  label {
+    font-weight: 500;
+  }
+  
